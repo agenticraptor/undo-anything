@@ -1,0 +1,95 @@
+version: 2
+
+project_name: undo-anything
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: ua
+    main: ./cmd/ua
+    binary: ua
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/agenticraptor/undo-anything/internal/buildinfo.Version={{.Version}}
+      - -X github.com/agenticraptor/undo-anything/internal/buildinfo.Commit={{.ShortCommit}}
+      - -X github.com/agenticraptor/undo-anything/internal/buildinfo.Date={{.Date}}
+
+archives:
+  - id: default
+    name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\(.+\))??!?:.+$'
+      order: 0
+    - title: Bug fixes
+      regexp: '^.*?fix(\(.+\))??!?:.+$'
+      order: 1
+    - title: Others
+      order: 999
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "merge conflict"
+      - Merge pull request
+      - Merge branch
+
+# Homebrew publishing is disabled by default so the first release succeeds
+# without extra setup. To enable `brew install agenticraptor/tap/ua`:
+#   1. Create a public repo: github.com/agenticraptor/homebrew-tap
+#   2. Add a HOMEBREW_TAP_GITHUB_TOKEN secret (a PAT with `repo` scope)
+#   3. Uncomment the line in .github/workflows/release.yml and the block below
+# brews:
+#   - name: undo-anything
+#     repository:
+#       owner: agenticraptor
+#       name: homebrew-tap
+#     homepage: "https://github.com/agenticraptor/undo-anything"
+#     description: "A universal local time machine for any folder, with one-key restore."
+#     license: "MIT"
+#     install: |
+#       bin.install "ua"
+#     test: |
+#       system "#{bin}/ua version"
+#     commit_author:
+#       name: goreleaser-bot
+#       email: bot@undo-anything.dev
+
+release:
+  github:
+    owner: agenticraptor
+    name: undo-anything
+  prerelease: auto
+  draft: false

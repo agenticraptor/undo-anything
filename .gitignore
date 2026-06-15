@@ -1,0 +1,27 @@
+# Binaries
+/ua
+/dist/
+/bin/
+*.exe
+*.out
+
+# Test & coverage
+coverage.out
+coverage.html
+*.test
+
+# undo-anything's own store (in case the repo is ever self-watched)
+.undo/
+
+# Editor / OS cruft
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Vendored dependencies (builds use go.sum + the module proxy instead)
+/vendor/
+
+# Local env
+.env
+.env.local
