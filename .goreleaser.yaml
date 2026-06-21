@@ -4,7 +4,9 @@ project_name: undo-anything
 
 before:
   hooks:
-    - go mod tidy
+    # Read-only: warms the module cache without rewriting go.mod/go.sum, so the
+    # working tree stays clean (GoReleaser aborts on a dirty tree).
+    - go mod download
 
 builds:
   - id: ua
